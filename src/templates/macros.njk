@@ -1,0 +1,19 @@
+{% macro folder(name, link) %}
+    <div class='item folder draggable'>
+        <div class='item-content drag-target' {% if link %}data-href='{{ link }}'{% endif %}>{{ name }}</div>
+    </div>
+{% endmacro %}
+
+{% macro file(name, link) %}
+    <div class='item file draggable'>
+        <div class='item-content drag-target' {% if link %}data-href='{{ link }}'{% endif %}>{{ name }}</div>
+    </div>
+{% endmacro %}
+
+{% macro name(name = 'Безымянный') %}
+    <div class='title-wrapper drag-target'>
+        <div class='title really-cool-border'>
+            <div>{{ name }}</div>
+        </div>
+    </div>
+{% endmacro %}

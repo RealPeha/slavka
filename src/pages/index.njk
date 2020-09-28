@@ -1,0 +1,15 @@
+{% set pageTitle = "Рома - лох" %}
+{% set windowName = 'Главная' %}
+
+{% extends "./templates/layout.njk" %}
+{% from "templates/macros.njk" import name %}
+
+{% block content %}
+    <div class='window resizable draggable fullscreen'>
+        {{ name(windowName) }}
+
+        <div class='content'>
+            Тут типо главная
+        </div>
+    </div>
+{% endblock %}

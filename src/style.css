@@ -1,0 +1,249 @@
+@font-face {
+    font-family: 'Pixel';
+    src: url('../font/14722.ttf') format('opentype');
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Pixel', monospace;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    height: 100%;
+    background-size: 3px 3px;
+    background-image:
+        linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+        linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+        linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+}
+
+.draggable {
+    position: relative;
+}
+
+.resizable {
+    position: relative;
+}
+
+.resizer {
+    position: absolute;
+}
+
+.resizer.top {
+    height: 6px;
+    top: -6px;
+    left: 0;
+    right: 0;
+    cursor: s-resize;
+}
+
+.resizer.right {
+    width: 6px;
+    top: 0;
+    bottom: 0;
+    right: -6px;
+    cursor: w-resize;
+}
+
+.resizer.bottom {
+    height: 6px;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    cursor: s-resize;
+}
+
+.resizer.left {
+    width: 6px;
+    top: 0;
+    bottom: 0;
+    left: -6px;
+    cursor: w-resize;
+}
+
+.resizer.top.left {
+    top: -6px;
+    bottom: auto;
+    right: auto;
+    cursor: se-resize;
+}
+
+.resizer.top.right {
+    top: -6px;
+    bottom: auto;
+    left: auto;
+    cursor: sw-resize;
+}
+
+.resizer.bottom.left {
+    bottom: -6px;
+    top: auto;
+    right: auto;
+    cursor: sw-resize;
+}
+
+.resizer.bottom.right {
+    bottom: -6px;
+    right: -6px;
+    top: auto;
+    left: auto;
+    cursor: se-resize;
+}
+
+.content-wrapper {
+    display: flex;
+    width: 70%;
+    position: relative;
+}
+
+.really-cool-border {
+    border-style: solid;
+    border-width: 6px;
+    border-image-slice: 2;
+    border-image-width: 1;
+    border-image-outset: 0;
+    border-image-source: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><path d='M0 2h2v2H0zM2 0h2v2H2zM4 2h2v2H4zM2 4h2v2H2z' fill='%23262626'/></svg>");
+    background-color: #fff;
+}
+
+.window {
+    display: flex;
+    flex-direction: column;
+    border: 6px solid #404040;
+    position: absolute;
+    width: 70%;
+    height: 70%;
+}
+
+.title-wrapper {
+    display: flex;
+    background-color: #808080;
+    border-bottom: 6px solid #404040;
+    line-height: 1rem;
+}
+
+.title {
+    text-align: center;
+    display: block;
+    min-width: 60%;
+    background: transparent;
+    margin: 5px auto;
+    position: relative;
+}
+
+.title div {
+    background: #fff;
+}
+
+.content {
+    background-color: #fff;
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    font-size: 2rem;
+    color: #373737;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 2rem;
+    flex-grow: 1;
+}
+
+.items-line {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.item {
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    color: #373737;
+}
+
+.item-content {
+    border-radius: 4px;
+    font-family: inherit;
+    word-spacing: -1px;
+    font-size: 10px;
+    text-align: center;
+    padding: 20px 5px 5px 5px;
+    width: 74px;
+    height: 74px;
+    z-index: 1;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    word-break: break-all;
+    image-rendering: pixelated;
+}
+
+.folder .item-content {
+    background-image: url('../img/folder_icon.png');
+}
+
+.folder:hover .item-content, .folder .item-content.active {
+    background-image: url('../img/folder_icon_selected.png');
+    color: #fff;
+}
+
+.file .item-content {
+    background-image: url('../img/file_icon.png');
+    padding: 20px 12px 5px 12px;
+    /* position: relative;
+    left: 20px; */
+}
+
+.file:hover .item-content, .file .item-content.active {
+    background-image: url('../img/file_icon_selected.png');
+    color: #fff;
+}
+
+@media (max-width: 744px) {
+    .wrapper {
+        flex-direction: column-reverse;
+    }
+
+    .content-wrapper {
+        width: 100%;
+        flex-grow: 1;
+    }
+
+    .sidebar-wrapper {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 0 1rem;
+        flex-grow: 0;
+    }
+
+    .items-line {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .item {
+        margin: 3px;
+    }
+
+    .item-content {
+        width: 60px;
+        height: 60px;
+    }
+}

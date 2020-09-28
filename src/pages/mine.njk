@@ -1,0 +1,15 @@
+{% set pageTitle = 'Mine' %}
+{% set windowName = 'Майнкрафт' %}
+
+{% extends "./templates/layout.njk" %}
+{% from "templates/macros.njk" import name %}
+
+{% block content %}
+    <div class='window resizable draggable fullscreen'>
+        {{ name(windowName) }}
+
+        <div class='content'>
+            Mine
+        </div>
+    </div>
+{% endblock %}
