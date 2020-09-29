@@ -1,11 +1,6 @@
-const draggableElements = document.querySelectorAll('.draggable')
-const resizableElements = document.querySelectorAll('.resizable')
-const fullscreenElements = document.querySelectorAll('.fullscreen')
-const linkElements = document.querySelectorAll('[data-href]')
-
 let zIndex = 1
-let isDrag = false
-let isBigger = window.innerWidth > 744
+let isDragging = false
+let isLargeScreen = window.innerWidth > 744
 
 const addEventListeners = (element, events, handler, options = {}) => {
     events.forEach(event => element.addEventListener(event, handler, options))
@@ -15,23 +10,31 @@ const removeEventListeners = (element, events, handler) => {
     events.forEach(event => element.removeEventListener(event, handler))
 }
 
-const getPageCoord = (e) => {
-    if (e.changedTouches) {
+const getPageCoords = ({ changedTouches, pageX, pageY }) => {
+    if (changedTouches) {
+        const [touch] = changedTouches
+
         return {
-            pageX: e.changedTouches[0].pageX,
-            pageY: e.changedTouches[0].pageY,
+            pageX: touch.pageX,
+            pageY: touch.pageY,
         }
     }
 
-    return {
-        pageX: e.pageX,
-        pageY: e.pageY,
-    }
+    return { pageX, pageY }
 }
+
+const applyStyles = (element) => (styles = {}) => {
+    Object.entries(styles).forEach(([property, value]) => {
+        element.style[property] = value.toString()
+    })
+}
+
+const setBodyStyles = applyStyles(document.body)
 
 const makeDraggable = (draggableElements) => {
     draggableElements.forEach(draggableElement => {
         const dragTargets = draggableElement.querySelectorAll('.drag-target') || [draggableElement]
+        const setDraggableStyles = applyStyles(draggableElement)
         
         dragTargets.forEach(dragTarget => {
             addEventListeners(dragTarget, ['mousedown', 'touchstart'], e => {
@@ -39,14 +42,10 @@ const makeDraggable = (draggableElements) => {
                     return
                 }
     
-                const {
-                    pageX: clickX,
-                    pageY: clickY,
-                } = getPageCoord(e)
+                const mouseClick = getPageCoords(e)
 
-                document.body.style.userSelect = 'none'
-    
-                draggableElement.style.zIndex = ++zIndex
+                setBodyStyles({ userSelect: 'none' })
+                setDraggableStyles({ zIndex: ++zIndex })
 
                 const styles = window.getComputedStyle(draggableElement, null)
 
@@ -54,17 +53,20 @@ const makeDraggable = (draggableElements) => {
                 const top = parseInt(styles.getPropertyValue('top')) || 0
     
                 const handleMouseMove = e => {
-                    isDrag = true
+                    isDragging = true
                     
-                    const { pageX, pageY } = getPageCoord(e)
+                    const { pageX, pageY } = getPageCoords(e)
 
-                    draggableElement.style.left = left + pageX - clickX + 'px'
-                    draggableElement.style.top = top + pageY - clickY + 'px'
+                    setDraggableStyles({
+                        left: left + pageX - mouseClick.pageX + 'px',
+                        top: top + pageY - mouseClick.pageY + 'px',
+                    })
                 }
 
                 const handleMouseUp = () => {
                     removeEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
-                    isDrag = false
+                    setBodyStyles({ userSelect: 'auto' })
+                    isDragging = false
                 }
     
                 addEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
@@ -90,6 +92,8 @@ const createResizers = (types, container) => {
 
 const makeResizable = (resizableElements) => {
     resizableElements.forEach(resizableElement => {
+        const setResizeStyles = applyStyles(resizableElement)
+
         const resizersContainer = document.createElement('div')
         resizableElement.appendChild(resizersContainer)
 
@@ -103,34 +107,36 @@ const makeResizable = (resizableElements) => {
         let rect = {}
 
         const resizeTop = (e) => {
-            const { pageY } = getPageCoord(e)
+            const { pageY } = getPageCoords(e)
 
-            resizableElement.style.height = rect.height + (mouseClick.pageY - pageY) + 'px'
+            setResizeStyles({ height: rect.height + (mouseClick.pageY - pageY) + 'px' })
 
-            if (!isBigger) {
-                resizableElement.style.top = offset.top + (pageY - mouseClick.pageY) + 'px'
+            if (!isLargeScreen) {
+                setResizeStyles({ top: offset.top + (pageY - mouseClick.pageY) + 'px' })
             } else {
-                resizableElement.style.top = pageY + 'px'
+                setResizeStyles({ top: pageY + 'px' })
             }
         }
 
         const resizeRight = (e) => {
-            const { pageX } = getPageCoord(e)
+            const { pageX } = getPageCoords(e)
 
-            resizableElement.style.width = pageX - rect.left + 'px'
+            setResizeStyles({ width: pageX - rect.left + 'px' })
         }
 
         const resizeBottom = (e) => {
-            const { pageY } = getPageCoord(e)
+            const { pageY } = getPageCoords(e)
 
-            resizableElement.style.height = pageY - rect.top + 'px'
+            setResizeStyles({ height: pageY - rect.top + 'px' })
         }
 
         const resizeLeft = (e) => {
-            const { pageX } = getPageCoord(e)
+            const { pageX } = getPageCoords(e)
 
-            resizableElement.style.width = rect.width + (mouseClick.pageX - pageX) + 'px'
-            resizableElement.style.left = pageX + 'px'
+            setResizeStyles({
+                width: rect.width + (mouseClick.pageX - pageX) + 'px',
+                left: pageX + 'px',
+            })
         }
 
         resizers.forEach(resizer => {
@@ -148,7 +154,7 @@ const makeResizable = (resizableElements) => {
             }
 
             addEventListeners(resizer, ['mousedown', 'touchstart'], (e) => {
-                mouseClick = getPageCoord(e)
+                mouseClick = getPageCoords(e)
                 rect = resizableElement.getBoundingClientRect()
                 offset = {
                     top: resizableElement.offsetTop,
@@ -163,7 +169,27 @@ const makeResizable = (resizableElements) => {
 }
 
 const makeFullscreen = (fullscreenElements) => {
+    const styles = {
+        top: 'calc((100% - 70%) / 2)',
+        left: 'calc((100% - 70%) / 2)',
+    }
+
     fullscreenElements.forEach(fullscreenElement => {
+        const setFullscreenStyles = applyStyles(fullscreenElement)
+
+        if (isLargeScreen) {
+            setFullscreenStyles({
+                ...styles,
+                width: `${fullscreenElement.getBoundingClientRect().width}px`,
+            })
+        } else {
+            setFullscreenStyles({
+                ...styles,
+                width: '90%',
+                margin: 0,
+            })
+        }
+
         let clickCount = 0
         let isFullscreen = false
         let rect = {}
@@ -171,8 +197,8 @@ const makeFullscreen = (fullscreenElements) => {
         addEventListeners(fullscreenElement, ['mousedown'], () => {
             clickCount++
             
-            if (clickCount >= 2) {                
-                fullscreenElement.style.transition = 'left .1s, top .1s, width .1s, height .1s'
+            if (clickCount >= 2) {     
+                setFullscreenStyles({ transition: 'left .1s, top .1s, width .1s, height .1s' })
             
                 if (!isFullscreen) {
                     const { width, height } = fullscreenElement.getBoundingClientRect()
@@ -185,19 +211,23 @@ const makeFullscreen = (fullscreenElements) => {
                     }
 
                     isFullscreen = true
-                    fullscreenElement.style.width = '100%'
-                    fullscreenElement.style.height = '100%'
-                    fullscreenElement.style.left = '0'
-                    fullscreenElement.style.top = '0'
+
+                    setFullscreenStyles({
+                        width: '100%', height: '100%',
+                        left: 0, top: 0,
+                    })
                 } else {
                     isFullscreen = false
-                    fullscreenElement.style.width = rect.width + 'px'
-                    fullscreenElement.style.height = rect.height + 'px'
-                    fullscreenElement.style.left = rect.left + 'px'
-                    fullscreenElement.style.top = rect.top + 'px'
+
+                    setFullscreenStyles({
+                        width: `${rect.width}px`,
+                        height: `${rect.height}px`,
+                        left: `${rect.left}px`,
+                        top: `${rect.top}px`,
+                    })
                 }
 
-                setTimeout(() => fullscreenElement.style.transition = 'none', 100)
+                setTimeout(() => setFullscreenStyles({ transition: 'none' }), 100)
             }
 
             setTimeout(() => clickCount = 0, 200)
@@ -210,27 +240,19 @@ const makeLink = (linkElements) => {
         const href = linkElement.dataset.href
 
         addEventListeners(linkElement, ['mouseup', 'touchend'], () => {
-            if (!isDrag) {
+            if (!isDragging) {
                 window.location.href = href
             }
         })
     })
 }
 
+const draggableElements = document.querySelectorAll('.draggable')
+const resizableElements = document.querySelectorAll('.resizable')
+const fullscreenElements = document.querySelectorAll('.fullscreen')
+const linkElements = document.querySelectorAll('[data-href]')
+
 makeDraggable(draggableElements)
 makeResizable(resizableElements)
 makeFullscreen(fullscreenElements)
 makeLink(linkElements)
-
-fullscreenElements.forEach(fullscreenElement => {
-    if (isBigger) {
-        fullscreenElement.style.top = 'calc((100% - 70%) / 2)'
-        fullscreenElement.style.left = 'calc((100% - 70%) / 2)'
-        fullscreenElement.style.width = `${fullscreenElement.getBoundingClientRect().width}px`
-    } else {
-        fullscreenElement.style.top = 'calc((100% - 70%) / 2)'
-        fullscreenElement.style.left = 'calc((100% - 90%) / 2)'
-        fullscreenElement.style.width = `90%`
-        fullscreenElement.style.margin = '0'
-    }
-})
