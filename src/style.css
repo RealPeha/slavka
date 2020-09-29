@@ -132,6 +132,7 @@ html, body {
     background-color: #808080;
     border-bottom: 6px solid #404040;
     line-height: 1rem;
+    position: relative;
 }
 
 .title {
@@ -147,6 +148,17 @@ html, body {
     background: #fff;
 }
 
+.window-close {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background-color: tomato;
+    cursor: pointer;
+}
+
 .content {
     background-color: #fff;
     flex-grow: 1;
@@ -155,6 +167,10 @@ html, body {
     color: #373737;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.content .items-wrapper {
+    display: flex;
 }
 
 .sidebar-wrapper {

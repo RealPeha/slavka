@@ -1,12 +1,12 @@
-{% macro folder(name, link) %}
+{% macro folder(name, link, id) %}
     <div class='item folder draggable'>
-        <div class='item-content drag-target' {% if link %}data-href='{{ link }}'{% endif %}>{{ name }}</div>
+        <div class='item-content drag-target' {% if link %}data-href='{{ link }}'{% endif %} {% if id %}data-window-id='{{ id }}'{% endif %}>{{ name }}</div>
     </div>
 {% endmacro %}
 
-{% macro file(name, link) %}
+{% macro file(name, link, id) %}
     <div class='item file draggable'>
-        <div class='item-content drag-target' {% if link %}data-href='{{ link }}'{% endif %}>{{ name }}</div>
+        <div class='item-content drag-target' {% if link %}data-href='{{ link }}'{% endif %} {% if id %}data-window-id='{{ id }}'{% endif %}>{{ name }}</div>
     </div>
 {% endmacro %}
 

@@ -2,6 +2,37 @@ let zIndex = 1
 let isDragging = false
 let isLargeScreen = window.innerWidth > 744
 
+const windowsContainer = document.querySelector('.content-wrapper')
+
+const openedWindows = []
+
+const windows = [
+    {
+        id: 'mine',
+        title: 'Minecraft',
+        items: [
+            {
+                type: 'folder',
+                title: 'Test',
+                windowId: 'test'
+            },
+            {
+                type: 'file',
+                title: 'File',
+                href: '/mine',
+            },
+        ],
+        itemsSort: (a, b) => a.type < b.type // folder first
+    },
+    {
+        id: 'toe',
+        title: 'Wantid',
+        content: `
+            Согласен
+        `.trim()
+    },
+]
+
 const addEventListeners = (element, events, handler, options = {}) => {
     events.forEach(event => element.addEventListener(event, handler, options))
 }
@@ -21,6 +52,94 @@ const getPageCoords = ({ changedTouches, pageX, pageY }) => {
     }
 
     return { pageX, pageY }
+}
+
+const createDiv = (parent, classList) => {
+    const div = document.createElement('div')
+
+    if (classList) {
+        div.classList.add(...classList)
+    }
+
+    parent.appendChild(div)
+
+    return div
+}
+
+const createItem = (parent, item) => {
+    const itemWrapper = createDiv(parent, ['item', item.type])
+    const itemContent = createDiv(itemWrapper, ['item-content'])
+
+    itemContent.innerText = item.title || ''
+
+    if (item.windowId) {
+        itemWrapper.dataset.windowId = item.windowId
+    }
+
+    if (item.href) {
+        itemWrapper.dataset.href = item.href
+    }
+
+    return itemWrapper
+}
+
+const createWindow = (id) => {
+    if (openedWindows.includes(id)) {
+        return
+    }
+
+    openedWindows.push(id)
+
+    const windowData = windows.find(window => window.id === id) || { title: '404', content: 'Not Found' }
+    
+    const windowWrapper = createDiv(windowsContainer, ['window', 'resizable', 'draggable', 'fullscreen'])
+    const titleWrapper = createDiv(windowWrapper, ['title-wrapper', 'drag-target'])
+    const content = createDiv(windowWrapper, ['content'])
+    const title = createDiv(titleWrapper, ['title', 'really-cool-border'])
+    const titleContent = createDiv(title)
+    const titleClose = createDiv(titleWrapper, ['window-close'])
+
+    titleClose.addEventListener('mousedown', e => {
+        windowWrapper.remove()
+        openedWindows.splice(openedWindows.indexOf(id), 1)
+    })
+
+    titleContent.innerText = windowData.title || ''
+    content.innerText = windowData.content || ''
+
+    if (windowData.items && windowData.items.length) {
+        const itemsWrapper = createDiv(content, ['items-wrapper'])
+
+        if (windowData.itemsSort) {
+            windowData.items.sort(windowData.itemsSort)
+        }
+        windowData.items.forEach(item => {
+            const createdItem = createItem(itemsWrapper, item)
+
+            if (item.href) {
+                makeLink([createdItem])
+            } else if (item.windowId) {
+                makeCanOpenWindow([createdItem])
+            }
+        })
+    }
+
+    makeDraggable([windowWrapper])
+    makeResizable([windowWrapper])
+    makeFullscreen([windowWrapper])
+
+    const applyWindowStyles = applyStyles(windowWrapper)
+
+    applyWindowStyles({ zIndex: ++zIndex })
+
+    if (windowData.sizes) {
+        applyWindowStyles({
+            width: windowData.sizes.width,
+            height: windowData.sizes.height,
+            ...(windowData.sizes.top && { top: windowData.sizes.top }),
+            ...(windowData.sizes.left && { left: windowData.sizes.left }),
+        })
+    }
 }
 
 const applyStyles = (element) => (styles = {}) => {
@@ -239,11 +358,27 @@ const makeLink = (linkElements) => {
     linkElements.forEach(linkElement => {
         const href = linkElement.dataset.href
 
-        addEventListeners(linkElement, ['mouseup', 'touchend'], () => {
-            if (!isDragging) {
-                window.location.href = href
-            }
-        })
+        if (href) {
+            addEventListeners(linkElement, ['mouseup', 'touchend'], () => {
+                if (!isDragging) {
+                    window.location.href = href
+                }
+            })
+        }
+    })
+}
+
+const makeCanOpenWindow = (elements) => {
+    elements.forEach(element => {
+        const windowId = element.dataset.windowId
+
+        if (windowId) {
+            addEventListeners(element, ['mouseup', 'touchend'], () => {
+                if (!isDragging) {
+                    createWindow(windowId)
+                }
+            })
+        }
     })
 }
 
@@ -251,8 +386,10 @@ const draggableElements = document.querySelectorAll('.draggable')
 const resizableElements = document.querySelectorAll('.resizable')
 const fullscreenElements = document.querySelectorAll('.fullscreen')
 const linkElements = document.querySelectorAll('[data-href]')
+const createWindowElements = document.querySelectorAll('[data-window-id]')
 
 makeDraggable(draggableElements)
 makeResizable(resizableElements)
 makeFullscreen(fullscreenElements)
 makeLink(linkElements)
+makeCanOpenWindow(createWindowElements)
