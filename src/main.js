@@ -1,167 +1,192 @@
-let zIndex = 1
-let isDragging = false
-let isLargeScreen = window.innerWidth > 744
+(() => {
+    const windowsContainer = document.querySelector('.content-wrapper')
+    const openedWindows = []
+    const windows = [
+        {
+            id: 'mine',
+            title: 'Minecraft',
+            items: [
+                {
+                    type: 'folder',
+                    title: 'Бесплатные моды для майнкрафта',
+                    windowId: 'test'
+                },
+                {
+                    type: 'file',
+                    title: 'Лучшая в мире игра',
+                    href: '/mine',
+                },
+            ],
+            itemsSort: (a, b) => a.type < b.type // folder first
+        },
+        {
+            id: 'toe',
+            title: 'Wantid',
+            content: `
+                <h1>Да</h1>
+                <p>Согласен</p>
+            `.trim()
+        },
+    ]
 
-const windowsContainer = document.querySelector('.content-wrapper')
+    let zIndex = 1
+    let isDragging = false
+    let isLargeScreen = window.innerWidth > 744
 
-const openedWindows = []
+    const addEventListeners = (element, events, handler, options = {}) => {
+        events.forEach(event => element.addEventListener(event, handler, options))
+    }
 
-const windows = [
-    {
-        id: 'mine',
-        title: 'Minecraft',
-        items: [
-            {
-                type: 'folder',
-                title: 'Test',
-                windowId: 'test'
-            },
-            {
-                type: 'file',
-                title: 'File',
-                href: '/mine',
-            },
-        ],
-        itemsSort: (a, b) => a.type < b.type // folder first
-        // itemsSort: (a, b) => a.type > b.type // file first
-    },
-    {
-        id: 'toe',
-        title: 'Wantid',
-        content: `
-            Согласен
-        `.trim()
-    },
-]
+    const removeEventListeners = (element, events, handler) => {
+        events.forEach(event => element.removeEventListener(event, handler))
+    }
 
-const addEventListeners = (element, events, handler, options = {}) => {
-    events.forEach(event => element.addEventListener(event, handler, options))
-}
+    const getPageCoords = ({ changedTouches, pageX, pageY }) => {
+        if (changedTouches) {
+            const [{ pageX, pageY }] = changedTouches
 
-const removeEventListeners = (element, events, handler) => {
-    events.forEach(event => element.removeEventListener(event, handler))
-}
-
-const getPageCoords = ({ changedTouches, pageX, pageY }) => {
-    if (changedTouches) {
-        const [touch] = changedTouches
-
-        return {
-            pageX: touch.pageX,
-            pageY: touch.pageY,
+            return { pageX, pageY }
         }
+
+        return { pageX, pageY }
     }
 
-    return { pageX, pageY }
-}
+    const createDiv = (parent, classList) => {
+        const div = document.createElement('div')
 
-const createDiv = (parent, classList) => {
-    const div = document.createElement('div')
-
-    if (classList) {
-        div.classList.add(...classList)
-    }
-
-    parent.appendChild(div)
-
-    return div
-}
-
-const createItem = (parent, item) => {
-    const itemWrapper = createDiv(parent, ['item', item.type])
-    const itemContent = createDiv(itemWrapper, ['item-content'])
-
-    itemContent.innerText = item.title || ''
-
-    if (item.windowId) {
-        itemWrapper.dataset.windowId = item.windowId
-    }
-
-    if (item.href) {
-        itemWrapper.dataset.href = item.href
-    }
-
-    return itemWrapper
-}
-
-const createWindow = (id) => {
-    if (openedWindows.includes(id)) {
-        return
-    }
-
-    openedWindows.push(id)
-
-    const windowData = windows.find(window => window.id === id) || { title: '404', content: 'Not Found' }
-    
-    const windowWrapper = createDiv(windowsContainer, ['window', 'resizable', 'draggable', 'fullscreen'])
-    const titleWrapper = createDiv(windowWrapper, ['title-wrapper', 'drag-target'])
-    const content = createDiv(windowWrapper, ['content'])
-    const title = createDiv(titleWrapper, ['title', 'really-cool-border'])
-    const titleContent = createDiv(title)
-    const titleClose = createDiv(titleWrapper, ['window-close'])
-
-    titleClose.addEventListener('mousedown', e => {
-        windowWrapper.remove()
-        openedWindows.splice(openedWindows.indexOf(id), 1)
-    })
-
-    titleContent.innerText = windowData.title || ''
-    content.innerText = windowData.content || ''
-
-    if (windowData.items && windowData.items.length) {
-        const itemsWrapper = createDiv(content, ['items-wrapper'])
-
-        if (windowData.itemsSort) {
-            windowData.items.sort(windowData.itemsSort)
+        if (classList) {
+            div.classList.add(...classList)
         }
-        windowData.items.forEach(item => {
-            const createdItem = createItem(itemsWrapper, item)
 
-            if (item.href) {
-                makeLink([createdItem])
-            } else if (item.windowId) {
-                makeCanOpenWindow([createdItem])
+        parent.appendChild(div)
+
+        return div
+    }
+
+    const createItem = (parent, item) => {
+        const { title = '', windowId, type, href } = item
+        
+        const itemWrapper = createDiv(parent, ['item', type])
+        const itemContent = createDiv(itemWrapper, ['item-content'])
+
+        itemContent.innerText = title
+
+        if (windowId) {
+            itemWrapper.dataset.windowId = windowId
+        }
+
+        if (href) {
+            itemWrapper.dataset.href = href
+        }
+
+        return itemWrapper
+    }
+
+    const createWindow = (id) => {
+        if (openedWindows.includes(id)) {
+            return
+        }
+
+        openedWindows.push(id)
+
+        const windowData = windows.find(window => window.id === id) || { title: '404', content: 'Not Found' }
+        
+        const windowWrapper = createDiv(windowsContainer, ['window', 'resizable', 'draggable', 'fullscreen'])
+        const titleWrapper = createDiv(windowWrapper, ['title-wrapper', 'drag-target'])
+        const contentDiv = createDiv(windowWrapper, ['content'])
+        const titleDiv = createDiv(titleWrapper, ['title', 'really-cool-border'])
+        const titleContent = createDiv(titleDiv)
+        const titleClose = createDiv(titleWrapper, ['window-close'])
+
+        addEventListeners(titleClose, ['mousedown'], () => {
+            applyStyles(windowWrapper)({ opacity: 0 })
+
+            setTimeout(() => {
+                windowWrapper.remove()
+                openedWindows.splice(openedWindows.indexOf(id), 1)
+            }, 200)
+        })
+
+        const { title = '', content = '', items, itemsSort, sizes } = windowData
+
+        titleContent.innerText = title
+        contentDiv.innerHTML = content
+
+        if (items && items.length) {
+            const itemsWrapper = createDiv(contentDiv, ['items-wrapper'])
+
+            if (itemsSort) {
+                items.sort(itemsSort)
             }
-        })
-    }
 
-    makeDraggable([windowWrapper])
-    makeResizable([windowWrapper])
-    makeFullscreen([windowWrapper])
+            items.forEach(item => {
+                const createdItem = createItem(itemsWrapper, item)
 
-    const applyWindowStyles = applyStyles(windowWrapper)
+                if (item.href) {
+                    makeLink([createdItem])
+                } else if (item.windowId) {
+                    makeCanOpenWindow([createdItem])
+                }
+            })
+        }
 
-    applyWindowStyles({ zIndex: ++zIndex })
+        makeDraggable([windowWrapper])
+        makeResizable([windowWrapper])
+        makeFullscreen([windowWrapper])
 
-    if (windowData.sizes) {
+        const applyWindowStyles = applyStyles(windowWrapper)
+
         applyWindowStyles({
-            width: windowData.sizes.width,
-            height: windowData.sizes.height,
-            ...(windowData.sizes.top && { top: windowData.sizes.top }),
-            ...(windowData.sizes.left && { left: windowData.sizes.left }),
+            zIndex: ++zIndex,
+            opacity: 1,
+        })
+
+        if (sizes) {
+            applyWindowStyles({
+                width: sizes.width,
+                height: sizes.height,
+                ...(sizes.top && { top: sizes.top }),
+                ...(sizes.left && { left: sizes.left }),
+            })
+        }
+    }
+
+    const createResizer = (type, parent) => {
+        const resizer = document.createElement('div')
+        resizer.classList.add('resizer', ...(Array.isArray(type) ? type : type.split(' ')))
+        parent.appendChild(resizer)
+
+        return resizer
+    }
+
+    const createResizers = (types, container) => {
+        return types.map(type => createResizer(type, container))
+    }
+
+    const applyStyles = (element) => (styles = {}) => {
+        Object.entries(styles).forEach(([property, value]) => {
+            element.style[property] = value.toString()
         })
     }
-}
 
-const applyStyles = (element) => (styles = {}) => {
-    Object.entries(styles).forEach(([property, value]) => {
-        element.style[property] = value.toString()
-    })
-}
+    const setBodyStyles = applyStyles(document.body)
 
-const setBodyStyles = applyStyles(document.body)
-
-const makeDraggable = (draggableElements) => {
-    draggableElements.forEach(draggableElement => {
+    const makeDraggable = (draggableElements) => draggableElements.forEach(draggableElement => {
         const dragTargets = draggableElement.querySelectorAll('.drag-target') || [draggableElement]
         const setDraggableStyles = applyStyles(draggableElement)
+
+        if (draggableElement !== dragTargets[0]) {
+            addEventListeners(draggableElement, ['mousedown', 'touchstart'], () => {
+                setDraggableStyles({ zIndex: ++zIndex })
+            })
+        }
         
         dragTargets.forEach(dragTarget => {
             addEventListeners(dragTarget, ['mousedown', 'touchstart'], e => {
                 if (!e.target.classList.contains('drag-target')) {
                     return
                 }
-    
+
                 const mouseClick = getPageCoords(e)
 
                 setBodyStyles({ userSelect: 'none' })
@@ -171,7 +196,7 @@ const makeDraggable = (draggableElements) => {
 
                 const left = parseInt(styles.getPropertyValue('left')) || 0
                 const top = parseInt(styles.getPropertyValue('top')) || 0
-    
+
                 const handleMouseMove = e => {
                     isDragging = true
                     
@@ -186,32 +211,19 @@ const makeDraggable = (draggableElements) => {
                 const handleMouseUp = () => {
                     removeEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
                     setBodyStyles({ userSelect: 'auto' })
+
                     isDragging = false
                 }
-    
+
                 addEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
                 addEventListeners(document, ['mouseup', 'touchend'], handleMouseUp, { once: true })
-    
+
                 dragTarget.ondragstart = () => false
             })
         })
     })
-}
 
-const createResizer = (type, parent) => {
-    const resizer = document.createElement('div')
-    resizer.classList.add('resizer', ...(Array.isArray(type) ? type : type.split(' ')))
-    parent.appendChild(resizer)
-
-    return resizer
-}
-
-const createResizers = (types, container) => {
-    return types.map(type => createResizer(type, container))
-}
-
-const makeResizable = (resizableElements) => {
-    resizableElements.forEach(resizableElement => {
+    const makeResizable = (resizableElements) => resizableElements.forEach(resizableElement => {
         const setResizeStyles = applyStyles(resizableElement)
 
         const resizersContainer = document.createElement('div')
@@ -268,7 +280,7 @@ const makeResizable = (resizableElements) => {
                 classes.contains('bottom') && resizeBottom(e)
                 classes.contains('left') && resizeLeft(e)
             }
-    
+
             const stopResize = () => {
                 removeEventListeners(window, ['mousemove', 'touchmove'], resize)
             }
@@ -286,10 +298,8 @@ const makeResizable = (resizableElements) => {
             })
         })
     })
-}
 
-const makeFullscreen = (fullscreenElements) => {
-    fullscreenElements.forEach(fullscreenElement => {
+    const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullscreenElement => {
         const setFullscreenStyles = applyStyles(fullscreenElement)
 
         if (isLargeScreen) {
@@ -350,10 +360,8 @@ const makeFullscreen = (fullscreenElements) => {
             setTimeout(() => clickCount = 0, 200)
         })
     })
-}
 
-const makeLink = (linkElements) => {
-    linkElements.forEach(linkElement => {
+    const makeLink = (linkElements) => linkElements.forEach(linkElement => {
         const href = linkElement.dataset.href
 
         if (href) {
@@ -364,10 +372,8 @@ const makeLink = (linkElements) => {
             })
         }
     })
-}
 
-const makeCanOpenWindow = (elements) => {
-    elements.forEach(element => {
+    const makeCanOpenWindow = (elements) => elements.forEach(element => {
         const windowId = element.dataset.windowId
 
         if (windowId) {
@@ -378,16 +384,16 @@ const makeCanOpenWindow = (elements) => {
             })
         }
     })
-}
 
-const draggableElements = document.querySelectorAll('.draggable')
-const resizableElements = document.querySelectorAll('.resizable')
-const fullscreenElements = document.querySelectorAll('.fullscreen')
-const linkElements = document.querySelectorAll('[data-href]')
-const createWindowElements = document.querySelectorAll('[data-window-id]')
+    const draggableElements = document.querySelectorAll('.draggable')
+    const resizableElements = document.querySelectorAll('.resizable')
+    const fullscreenElements = document.querySelectorAll('.fullscreen')
+    const linkElements = document.querySelectorAll('[data-href]')
+    const createWindowElements = document.querySelectorAll('[data-window-id]')
 
-makeDraggable(draggableElements)
-makeResizable(resizableElements)
-makeFullscreen(fullscreenElements)
-makeLink(linkElements)
-makeCanOpenWindow(createWindowElements)
+    makeDraggable(draggableElements)
+    makeResizable(resizableElements)
+    makeFullscreen(fullscreenElements)
+    makeLink(linkElements)
+    makeCanOpenWindow(createWindowElements)
+})()
