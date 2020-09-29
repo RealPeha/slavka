@@ -23,6 +23,7 @@ const windows = [
             },
         ],
         itemsSort: (a, b) => a.type < b.type // folder first
+        // itemsSort: (a, b) => a.type > b.type // file first
     },
     {
         id: 'toe',

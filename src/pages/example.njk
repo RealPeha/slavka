@@ -1,18 +1,19 @@
-{% set pageTitle = "Рома - лох" %}
-{% set windowName = 'Главная' %}
+{% set pageTitle = 'Page Title' %}
+{% set windowName = 'Window Title' %}
 
-{% extends "./templates/layout.njk" %}
+{% extends "./templates/page-layout.njk" %}
 
 {% block content %}
-    <div class='window resizable draggable fullscreen'>
+    <div class='window'>
         <div class='title-wrapper drag-target'>
             <div class='title really-cool-border'>
                 <div>{{ windowName }}</div>
             </div>
+            <a class='window-close' href='/'></a>
         </div>
 
         <div class='content'>
-            Тут типо главная
+            Page Content
         </div>
     </div>
 {% endblock %}
