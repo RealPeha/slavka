@@ -289,22 +289,19 @@ const makeResizable = (resizableElements) => {
 }
 
 const makeFullscreen = (fullscreenElements) => {
-    const styles = {
-        top: 'calc((100% - 70%) / 2)',
-        left: 'calc((100% - 70%) / 2)',
-    }
-
     fullscreenElements.forEach(fullscreenElement => {
         const setFullscreenStyles = applyStyles(fullscreenElement)
 
         if (isLargeScreen) {
             setFullscreenStyles({
-                ...styles,
+                top: 'calc((100% - 70%) / 2)',
+                left: 'calc((100% - 70%) / 2)',
                 width: `${fullscreenElement.getBoundingClientRect().width}px`,
             })
         } else {
             setFullscreenStyles({
-                ...styles,
+                top: 'calc((100% - 70%) / 2)',
+                left: 'calc((100% - 90%) / 2)',
                 width: '90%',
                 margin: 0,
             })
