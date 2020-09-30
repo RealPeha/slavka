@@ -9,7 +9,7 @@
                 {
                     type: 'folder',
                     title: 'Бесплатные моды для майнкрафта',
-                    windowId: 'test'
+                    windowId: 'test',
                 },
                 {
                     type: 'file',
@@ -17,7 +17,7 @@
                     href: '/mine',
                 },
             ],
-            itemsSort: (a, b) => a.type < b.type // folder first
+            itemsSort: (a, b) => a.type < b.type, // folder first
         },
         {
             id: 'toe',
@@ -25,7 +25,17 @@
             content: `
                 <h1>Да</h1>
                 <p>Согласен</p>
-            `.trim()
+            `.trim(),
+            styles: {
+                width: 'auto',
+                height: 'auto',
+            },
+            features: {
+                resizable: false,
+                fullscreen: false,
+                title: false,
+                // draggable: true,
+            }
         },
     ]
 
@@ -87,29 +97,58 @@
             return
         }
 
+        const defaultFeatures = {
+            resizable: true,
+            draggable: true,
+            fullscreen: true,
+            title: true,
+        }
+
         openedWindows.push(id)
 
         const windowData = windows.find(window => window.id === id) || { title: '404', content: 'Not Found' }
+
+        const {
+            title = '',
+            content = '',
+            items,
+            itemsSort,
+            styles,
+            features,
+        } = windowData
+
+        const windowFeatures = {
+            ...defaultFeatures,
+            ...features,
+        }
         
         const windowWrapper = createDiv(windowsContainer, ['window', 'resizable', 'draggable', 'fullscreen'])
         const titleWrapper = createDiv(windowWrapper, ['title-wrapper', 'drag-target'])
         const contentDiv = createDiv(windowWrapper, ['content'])
-        const titleDiv = createDiv(titleWrapper, ['title', 'really-cool-border'])
-        const titleContent = createDiv(titleDiv)
-        const titleClose = createDiv(titleWrapper, ['window-close'])
 
-        addEventListeners(titleClose, ['mousedown'], () => {
+        const close = (e) => {
+            e.preventDefault()
+            
             applyStyles(windowWrapper)({ opacity: 0 })
 
             setTimeout(() => {
                 windowWrapper.remove()
                 openedWindows.splice(openedWindows.indexOf(id), 1)
             }, 200)
-        })
+        }
 
-        const { title = '', content = '', items, itemsSort, sizes } = windowData
+        if (windowFeatures.title) {
+            const titleDiv = createDiv(titleWrapper, ['title', 'really-cool-border'])
+            const titleContent = createDiv(titleDiv)
+            const titleClose = createDiv(titleWrapper, ['window-close'])
 
-        titleContent.innerText = title
+            addEventListeners(titleClose, ['mousedown'], close)
+
+            titleContent.innerText = title
+        } else {
+            addEventListeners(titleWrapper, ['contextmenu'], close)
+        }
+
         contentDiv.innerHTML = content
 
         if (items && items.length) {
@@ -123,32 +162,25 @@
                 const createdItem = createItem(itemsWrapper, item)
 
                 if (item.href) {
-                    makeLink([createdItem])
+                    makeClickable([createdItem])
                 } else if (item.windowId) {
-                    makeCanOpenWindow([createdItem])
+                    makeOpenable([createdItem])
                 }
             })
         }
 
-        makeDraggable([windowWrapper])
-        makeResizable([windowWrapper])
-        makeFullscreen([windowWrapper])
+        windowFeatures.draggable && makeDraggable([windowWrapper])
+        windowFeatures.resizable && makeResizable([windowWrapper])
+        windowFeatures.fullscreen && makeFullscreen([windowWrapper])
+        makeCentered([windowWrapper])
 
         const applyWindowStyles = applyStyles(windowWrapper)
 
         applyWindowStyles({
+            ...(styles || {}),
             zIndex: ++zIndex,
             opacity: 1,
         })
-
-        if (sizes) {
-            applyWindowStyles({
-                width: sizes.width,
-                height: sizes.height,
-                ...(sizes.top && { top: sizes.top }),
-                ...(sizes.left && { left: sizes.left }),
-            })
-        }
     }
 
     const createResizer = (type, parent) => {
@@ -302,21 +334,6 @@
     const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullscreenElement => {
         const setFullscreenStyles = applyStyles(fullscreenElement)
 
-        if (isLargeScreen) {
-            setFullscreenStyles({
-                top: 'calc((100% - 70%) / 2)',
-                left: 'calc((100% - 70%) / 2)',
-                width: `${fullscreenElement.getBoundingClientRect().width}px`,
-            })
-        } else {
-            setFullscreenStyles({
-                top: 'calc((100% - 70%) / 2)',
-                left: 'calc((100% - 90%) / 2)',
-                width: '90%',
-                margin: 0,
-            })
-        }
-
         let clickCount = 0
         let isFullscreen = false
         let rect = {}
@@ -361,7 +378,7 @@
         })
     })
 
-    const makeLink = (linkElements) => linkElements.forEach(linkElement => {
+    const makeClickable = (linkElements) => linkElements.forEach(linkElement => {
         const href = linkElement.dataset.href
 
         if (href) {
@@ -373,7 +390,7 @@
         }
     })
 
-    const makeCanOpenWindow = (elements) => elements.forEach(element => {
+    const makeOpenable = (elements) => elements.forEach(element => {
         const windowId = element.dataset.windowId
 
         if (windowId) {
@@ -385,15 +402,27 @@
         }
     })
 
-    const draggableElements = document.querySelectorAll('.draggable')
-    const resizableElements = document.querySelectorAll('.resizable')
-    const fullscreenElements = document.querySelectorAll('.fullscreen')
-    const linkElements = document.querySelectorAll('[data-href]')
-    const createWindowElements = document.querySelectorAll('[data-window-id]')
+    const makeCentered = (elements) => elements.forEach(element => {
+        const setStyles = applyStyles(element)
 
-    makeDraggable(draggableElements)
-    makeResizable(resizableElements)
-    makeFullscreen(fullscreenElements)
-    makeLink(linkElements)
-    makeCanOpenWindow(createWindowElements)
+        if (isLargeScreen) {
+            setStyles({
+                top: 'calc((100% - 70%) / 2)',
+                left: 'calc((100% - 70%) / 2)',
+            })
+        } else {
+            setStyles({
+                top: 'calc((100% - 70%) / 2)',
+                left: 'calc((100% - 90%) / 2)',
+                width: '90%',
+            })
+        }
+    })
+
+    makeDraggable(document.querySelectorAll('.draggable'))
+    makeResizable(document.querySelectorAll('.resizable'))
+    makeFullscreen(document.querySelectorAll('.fullscreen'))
+    makeCentered(document.querySelectorAll('.fullscreen'))
+    makeClickable(document.querySelectorAll('[data-href]'))
+    makeOpenable(document.querySelectorAll('[data-window-id]'))
 })()
