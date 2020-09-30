@@ -125,6 +125,14 @@ html, body {
     position: absolute;
     width: 70%;
     height: 70%;
+    min-width: 250px;
+    min-height: 170px;
+    opacity: 0;
+    transition: opacity .2s;
+}
+
+.visible {
+    opacity: 1;
 }
 
 .title-wrapper {
@@ -220,9 +228,7 @@ html, body {
 
 .file .item-content {
     background-image: url('../img/file_icon.png');
-    padding: 20px 12px 5px 12px;
-    /* position: relative;
-    left: 20px; */
+    padding: 20px 15px 5px 15px;
 }
 
 .file:hover .item-content, .file .item-content.active {
