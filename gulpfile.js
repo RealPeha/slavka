@@ -4,10 +4,11 @@ const rename = require('gulp-rename')
 const postcss = require('gulp-postcss')
 const autoprefixer = require('autoprefixer')
 const cssnano = require('cssnano')
-const uglify = require('gulp-uglify')
+const terser = require('gulp-terser')
 const babel = require('gulp-babel')
+const { pipeline } = require('readable-stream')
 
-const { series, parallel } = gulp
+const { series, parallel, src, task, dest, watch } = gulp
 
 const path = {
     src: {
@@ -23,47 +24,53 @@ const path = {
     },
 }
 
-gulp.task('nunjucks', () => {
-	return gulp.src(path.src.njk)
-        .pipe(nunjucks({
+task('nunjucks', () => {
+	return pipeline(
+        src(path.src.njk),
+        nunjucks({
             path: ['./src']
-        }))
-        .pipe(rename({
+        }),
+        rename({
             dirname: './',
-        }))
-    	.pipe(gulp.dest(path.dist.html))
+        }),
+        dest(path.dist.html),
+    )
 })
 
-gulp.task('css', () => {
-    const plugins = [
-        autoprefixer(),
-        cssnano(),
-    ]
-
-    return gulp.src(path.src.css)
-        .pipe(postcss(plugins))
-        .pipe(gulp.dest(path.dist.css))
+task('css', () => {
+    return pipeline(
+        src(path.src.css),
+        postcss([
+            autoprefixer(),
+            cssnano(),
+        ]),
+        dest(path.dist.css),
+    )
 })
 
-gulp.task('js', () => {
-    return gulp.src(path.src.js)
-        .pipe(babel({
+task('js', () => {
+    return pipeline(
+        src(path.src.js),
+        babel({
             presets: [
                 ['@babel/env', {
-                    modules: false
+                    modules: false,
                 }],
             ]
-        }))
-        .pipe(uglify())
-        .pipe(gulp.dest(path.dist.js))
+        }),
+        terser({
+            toplevel: true,
+        }),
+        dest(path.dist.js),
+    )
 })
 
-gulp.task('watch', () => {
-	gulp.watch(path.src.njkAll, series('nunjucks'))
-	gulp.watch(path.src.js, series('js'))
-	gulp.watch(path.src.css, series('css'))
+task('watch', () => {
+	watch(path.src.njkAll, series('nunjucks'))
+	watch(path.src.js, series('js'))
+	watch(path.src.css, series('css'))
 })
 
-gulp.task('build', parallel('nunjucks', 'css', 'js'))
+task('build', parallel('nunjucks', 'css', 'js'))
 
-gulp.task('default', series('build', 'watch'))
+task('default', series('build', 'watch'))

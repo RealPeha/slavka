@@ -70,8 +70,10 @@ html, body {
 .content {
     background-color: #fff;
     flex-grow: 1;
-    padding: 2rem 3rem;
     color: #373737;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
+}
+
+.ss-content {
+    padding: 2rem 3rem;
 }

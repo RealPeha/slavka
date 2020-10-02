@@ -1,4 +1,4 @@
-(() => {
+
     const windowsContainer = document.querySelector('.content-wrapper')
     const openedWindows = []
     const windows = [
@@ -425,4 +425,3 @@
     makeCentered(document.querySelectorAll('.fullscreen'))
     makeClickable(document.querySelectorAll('[data-href]'))
     makeOpenable(document.querySelectorAll('[data-window-id]'))
-})()
