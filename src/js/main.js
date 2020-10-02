@@ -75,7 +75,7 @@
 
     const createItem = (parent, item) => {
         const { title = '', windowId, type, href } = item
-        
+
         const itemWrapper = createDiv(parent, ['item', type])
         const itemContent = createDiv(itemWrapper, ['item-content'])
 
@@ -121,14 +121,14 @@
             ...defaultFeatures,
             ...features,
         }
-        
+
         const windowWrapper = createDiv(windowsContainer, ['window', 'resizable', 'draggable', 'fullscreen'])
         const titleWrapper = createDiv(windowWrapper, ['title-wrapper', 'drag-target'])
         const contentDiv = createDiv(windowWrapper, ['content'])
 
         const close = (e) => {
             e.preventDefault()
-            
+
             applyStyles(windowWrapper)({ opacity: 0 })
 
             setTimeout(() => {
@@ -212,7 +212,7 @@
                 setDraggableStyles({ zIndex: ++zIndex })
             })
         }
-        
+
         dragTargets.forEach(dragTarget => {
             addEventListeners(dragTarget, ['mousedown', 'touchstart'], e => {
                 if (!e.target.classList.contains('drag-target')) {
@@ -231,7 +231,7 @@
 
                 const handleMouseMove = e => {
                     isDragging = true
-                    
+
                     const { pageX, pageY } = getPageCoords(e)
 
                     setDraggableStyles({
@@ -324,7 +324,7 @@
                     top: resizableElement.offsetTop,
                     left: resizableElement.offsetLeft,
                 }
-                
+
                 addEventListeners(window, ['mousemove', 'touchmove'], resize)
                 addEventListeners(window, ['mouseup', 'touchend'], stopResize)
             })
@@ -340,10 +340,10 @@
 
         addEventListeners(fullscreenElement, ['mousedown'], () => {
             clickCount++
-            
-            if (clickCount >= 2) {     
+
+            if (clickCount >= 2) {
                 setFullscreenStyles({ transition: 'left .1s, top .1s, width .1s, height .1s' })
-            
+
                 if (!isFullscreen) {
                     const { width, height } = fullscreenElement.getBoundingClientRect()
 

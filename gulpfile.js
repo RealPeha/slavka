@@ -6,6 +6,8 @@ const autoprefixer = require('autoprefixer')
 const cssnano = require('cssnano')
 const terser = require('gulp-terser')
 const babel = require('gulp-babel')
+const image = require('gulp-image')
+const clean = require('gulp-clean')
 const { pipeline } = require('readable-stream')
 
 const { series, parallel, src, task, dest, watch } = gulp
@@ -14,13 +16,19 @@ const path = {
     src: {
         njkAll: './src/**/*.njk',
         njk: ['./src/pages/*.njk'],
-        css: './src/*.css',
-        js: './src/*.js',
+        css: './src/**/*.css',
+        js: './src/**/*.js',
+        images: './src/img/*.*',
+        fonts: './src/font/*.ttf',
+        other: ['./src/.htaccess'],
     },
     dist: {
         html: './public',
-        css: './public/css',
-        js: './public/js',
+        css: './public',
+        js: './public',
+        img: './public/img',
+        font: './public/font',
+        other: './public',
     },
 }
 
@@ -71,6 +79,41 @@ task('watch', () => {
 	watch(path.src.css, series('css'))
 })
 
-task('build', parallel('nunjucks', 'css', 'js'))
+task('image', () => {
+    return pipeline(
+        src(path.src.images),
+        image(),
+        dest(path.dist.img),
+    )
+})
+
+task('font', () => {
+    return pipeline(
+        src(path.src.fonts, { read: false }),
+        dest(path.dist.font),
+    )
+})
+
+task('other', () => {
+    return pipeline(
+        src(path.src.other, { read: false }),
+        dest(path.dist.other),
+    )
+})
+
+task('clean', () => {
+    return pipeline(
+        src('./public', { read: false }),
+        clean(),
+    )
+})
+
+task('watch', () => {
+	watch(path.src.njkAll, series('nunjucks'))
+	watch(path.src.js, series('js'))
+	watch(path.src.css, series('css'))
+})
+
+task('build', series('clean', parallel('nunjucks', 'css', 'js', 'image', 'font', 'other')))
 
 task('default', series('build', 'watch'))
