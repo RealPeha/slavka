@@ -4,12 +4,13 @@ const rename = require('gulp-rename')
 const postcss = require('gulp-postcss')
 const autoprefixer = require('autoprefixer')
 const cssnano = require('cssnano')
-const uglify = require('gulp-uglify')
+const terser = require('gulp-terser')
 const babel = require('gulp-babel')
 const image = require('gulp-image')
 const clean = require('gulp-clean')
+const { pipeline } = require('readable-stream')
 
-const { series, parallel } = gulp
+const { series, parallel, src, task, dest, watch } = gulp
 
 const path = {
     src: {
@@ -31,68 +32,88 @@ const path = {
     },
 }
 
-gulp.task('nunjucks', () => {
-	return gulp.src(path.src.njk)
-        .pipe(nunjucks({
+task('nunjucks', () => {
+	return pipeline(
+        src(path.src.njk),
+        nunjucks({
             path: ['./src']
-        }))
-        .pipe(rename({
+        }),
+        rename({
             dirname: './',
-        }))
-    	.pipe(gulp.dest(path.dist.html))
+        }),
+        dest(path.dist.html),
+    )
 })
 
-gulp.task('css', () => {
-    const plugins = [
-        autoprefixer(),
-        cssnano(),
-    ]
-
-    return gulp.src(path.src.css)
-        .pipe(postcss(plugins))
-        .pipe(gulp.dest(path.dist.css))
+task('css', () => {
+    return pipeline(
+        src(path.src.css),
+        postcss([
+            autoprefixer(),
+            cssnano(),
+        ]),
+        dest(path.dist.css),
+    )
 })
 
-gulp.task('js', () => {
-    return gulp.src(path.src.js)
-        .pipe(babel({
+task('js', () => {
+    return pipeline(
+        src(path.src.js),
+        babel({
             presets: [
                 ['@babel/env', {
-                    modules: false
+                    modules: false,
                 }],
             ]
-        }))
-        .pipe(uglify())
-        .pipe(gulp.dest(path.dist.js))
+        }),
+        terser({
+            toplevel: true,
+        }),
+        dest(path.dist.js),
+    )
 })
 
-gulp.task('image', () => {
-    return gulp.src(path.src.images)
-        .pipe(image())
-        .pipe(gulp.dest(path.dist.img))
+task('watch', () => {
+	watch(path.src.njkAll, series('nunjucks'))
+	watch(path.src.js, series('js'))
+	watch(path.src.css, series('css'))
 })
 
-gulp.task('font', () => {
-    return gulp.src(path.src.fonts, { read: false })
-        .pipe(gulp.dest(path.dist.font))
+task('image', () => {
+    return pipeline(
+        src(path.src.images),
+        image(),
+        dest(path.dist.img),
+    )
 })
 
-gulp.task('other', () => {
-    return gulp.src(path.src.other, { read: false })
-        .pipe(gulp.dest(path.dist.other))
+task('font', () => {
+    return pipeline(
+        src(path.src.fonts, { read: false }),
+        dest(path.dist.font),
+    )
 })
 
-gulp.task('clean', () => {
-    return gulp.src('./public', { read: false })
-        .pipe(clean())
+task('other', () => {
+    return pipeline(
+        src(path.src.other, { read: false }),
+        dest(path.dist.other),
+    )
 })
 
-gulp.task('watch', () => {
-	gulp.watch(path.src.njkAll, series('nunjucks'))
-	gulp.watch(path.src.js, series('js'))
-	gulp.watch(path.src.css, series('css'))
+task('clean', () => {
+    return pipeline(
+        src('./public', { read: false }),
+        clean(),
+    )
 })
 
-gulp.task('build', series('clean', parallel('nunjucks', 'css', 'js', 'image', 'font', 'other')))
+task('watch', () => {
+	watch(path.src.njkAll, series('nunjucks'))
+	watch(path.src.js, series('js'))
+	watch(path.src.css, series('css'))
+})
 
-gulp.task('default', series('build', 'watch'))
+task('build', series('clean', parallel('nunjucks', 'css', 'js', 'image', 'font', 'other')))
+
+task('default', series('build', 'watch'))
