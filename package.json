@@ -3,7 +3,7 @@
     "dev": "gulp",
     "build": "gulp build",
     "serve": "serve public",
-    "deploy": "node deploy.js"
+    "deploy": "yarn build && node deploy.js"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
