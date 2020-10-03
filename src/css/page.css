@@ -68,12 +68,58 @@ html, body {
 }
 
 .content {
+    width: 100%;
     background-color: #fff;
     flex-grow: 1;
     color: #373737;
-    overflow: hidden;
+    overflow: auto;
+    height: 100%;
+    padding: 2rem 3rem;
 }
 
-.ss-content {
-    padding: 2rem 3rem;
+.simplebar-track.simplebar-vertical {
+    width: 20px;
+}
+
+.simplebar-track.simplebar-vertical::before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 6px;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+    background-color: #404040;
+}
+
+.simplebar-scrollbar::before {
+    border-radius: 0;
+    border: 6px solid #262626;
+    background-color: grey;
+    right: 0;
+    left: 0;
+    opacity: 1 !important;
+}
+
+.simplebar-scrollbar::after {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 30%;
+    border-top: 6px solid #262626;
+    border-bottom: 6px solid #262626;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.simplebar-track.simplebar-vertical .simplebar-scrollbar:before {
+    top: 0;
+    bottom: -1px;
+}
+
+@media (max-width: 744px) {
+    .content {
+        padding: 1rem 2rem 1rem 1rem;
+    }
 }

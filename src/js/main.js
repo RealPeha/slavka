@@ -176,7 +176,7 @@ const createWindow = (id) => {
     windowFeatures.fullscreen && makeFullscreen([windowWrapper])
     makeCentered([windowWrapper])
 
-    window.initScrollbar(contentDiv)
+    new SimpleBar(contentDiv)
 
     const applyWindowStyles = applyStyles(windowWrapper)
 
@@ -315,7 +315,6 @@ const makeResizable = (resizableElements) => resizableElements.forEach(resizable
             classes.contains('right') && resizeRight(e)
             classes.contains('bottom') && resizeBottom(e)
             classes.contains('left') && resizeLeft(e)
-            window.mB()
         }
 
         const stopResize = () => {
@@ -376,12 +375,7 @@ const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullsc
                 })
             }
 
-            const interval = setInterval(() => window.mB(), 0)
-
-            setTimeout(() => {
-                setFullscreenStyles({ transition: 'none' })
-                clearInterval(interval)
-            }, 100)
+            setTimeout(() => setFullscreenStyles({ transition: 'none' }), 100)
         }
 
         setTimeout(() => clickCount = 0, 200)
