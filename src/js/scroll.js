@@ -45,13 +45,18 @@
       this.bar = '<div class="ss-scroll">';
       //Create a reference to the function binding to remove the event listeners
       this.mB = this.moveBar.bind(this);
+      window.mB = this.mB
   
       this.wrapper = d.createElement('div');
       this.wrapper.setAttribute('class', 'ss-wrapper');
   
       this.el = d.createElement('div');
       this.el.setAttribute('class', 'ss-content');
+
+      this.line = d.createElement('div');
+      this.line.setAttribute('class', 'ss-content-line');
   
+      this.el.appendChild(this.line)
       this.wrapper.appendChild(this.el);
   
       while (this.target.firstChild) {
@@ -86,7 +91,7 @@
   
         this.scrollRatio = ownHeight / totalHeight;
   
-        var right = (_this.target.clientWidth - _this.bar.clientWidth) * -1;
+        var right = (_this.target.clientWidth - _this.bar.offsetWidth) * -1;
   
         raf(function() {
           // Hide scrollbar if no scrolling is possible
@@ -94,6 +99,7 @@
             _this.bar.classList.add('ss-hidden')
           } else {
             _this.bar.classList.remove('ss-hidden')
+            _this.line.style.height = totalHeight + 'px'
             _this.bar.style.cssText = 'height:' + Math.max(_this.scrollRatio * 100, 10) + '%; top:' + (_this.el.scrollTop / totalHeight ) * 100 + '%;right:' + right + 'px;';
           }
         });
@@ -109,4 +115,5 @@
     }
   
     d.addEventListener('DOMContentLoaded', initAll);
+    window.initScrollbar = initEl
 })(window, document)

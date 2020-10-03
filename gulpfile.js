@@ -89,14 +89,14 @@ task('image', () => {
 
 task('font', () => {
     return pipeline(
-        src(path.src.fonts, { read: false }),
+        src(path.src.fonts),
         dest(path.dist.font),
     )
 })
 
 task('other', () => {
     return pipeline(
-        src(path.src.other, { read: false }),
+        src(path.src.other),
         dest(path.dist.other),
     )
 })
