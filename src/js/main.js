@@ -1,5 +1,13 @@
 const windowsContainer = document.querySelector('.content-wrapper')
-const openedWindows = []
+
+let openedWindows = []
+
+if (localStorage.getItem('openedWindows')) {
+    try {
+        openedWindows = JSON.parse(localStorage.getItem('openedWindows'))
+    } catch(e) {}
+}
+
 const windows = [
     {
         id: 'mine',
@@ -91,8 +99,8 @@ const createItem = (parent, item) => {
     return itemWrapper
 }
 
-const createWindow = (id) => {
-    if (openedWindows.includes(id)) {
+const createWindow = (id, ignoreOpened = false) => {
+    if (openedWindows.includes(id) && !ignoreOpened) {
         return
     }
 
@@ -103,7 +111,9 @@ const createWindow = (id) => {
         title: true,
     }
 
-    openedWindows.push(id)
+    if (!ignoreOpened) {
+        openedWindows.push(id)
+    }
 
     const windowData = windows.find(window => window.id === id) || {
         title: '404',
@@ -429,3 +439,47 @@ makeFullscreen(document.querySelectorAll('.fullscreen'))
 makeCentered(document.querySelectorAll('.fullscreen'))
 makeClickable(document.querySelectorAll('[data-href]'))
 makeOpenable(document.querySelectorAll('[data-window-id]'))
+
+openedWindows.forEach(windowId => createWindow(windowId, true))
+
+const savePageState = () => {
+    const elements = document.querySelectorAll('.draggable')
+
+    const state = [...elements].map(element => {
+        const style = element.style
+
+        return {
+            ...(style.zIndex && { zIndex: style.zIndex }),
+            ...(style.top && { top: style.top }),
+            ...(style.left && { left: style.left }),
+            ...(style.width && { width: style.width }),
+            ...(style.height && { height: style.height }),
+            ...(element.dataset.inFullscreen && { fullscreen: element.dataset.inFullscreen }),
+        }
+    })
+
+    localStorage.setItem('pageState', JSON.stringify(state))
+    localStorage.setItem('openedWindows', JSON.stringify(openedWindows))
+}
+
+const restorePageState = () => {
+    try {
+        const state = JSON.parse(localStorage.getItem('pageState'))
+
+        zIndex = Math.max(...state.map(({ zIndex }) => parseInt(zIndex)).filter(Boolean))
+
+        const elements = document.querySelectorAll('.draggable')
+
+        elements.forEach((element, i) => {
+            const elementState = state[i]
+
+            applyStyles(element)(elementState)
+        })
+    } catch (e) {}
+}
+
+restorePageState()
+
+window.addEventListener('beforeunload', () => {
+    savePageState()
+}, false);
