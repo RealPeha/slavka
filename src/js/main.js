@@ -244,6 +244,10 @@ const makeDraggable = (draggableElements) => draggableElements.forEach(draggable
             const top = parseInt(styles.getPropertyValue('top')) || 0
 
             const handleMouseMove = e => {
+                if (draggableElement.dataset.isFullscreen === 'true') {
+                    draggableElement.dataset.isFullscreen = 'false'
+                }
+
                 isDragging = true
 
                 const { pageX, pageY } = getPageCoords(e)
@@ -321,6 +325,10 @@ const makeResizable = (resizableElements) => resizableElements.forEach(resizable
         const classes = resizer.classList
 
         const resize = (e) => {
+            if (resizableElement.dataset.isFullscreen === 'true') {
+                resizableElement.dataset.isFullscreen = 'false'
+            }
+
             classes.contains('top') && resizeTop(e)
             classes.contains('right') && resizeRight(e)
             classes.contains('bottom') && resizeBottom(e)
@@ -349,7 +357,7 @@ const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullsc
     const setFullscreenStyles = applyStyles(fullscreenElement)
 
     let clickCount = 0
-    let isFullscreen = false
+    // let isFullscreen = false
     let rect = {}
 
     addEventListeners(fullscreenElement, ['mousedown'], () => {
@@ -358,7 +366,7 @@ const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullsc
         if (clickCount >= 2) {
             setFullscreenStyles({ transition: 'left .1s, top .1s, width .1s, height .1s' })
 
-            if (!isFullscreen) {
+            if (!fullscreenElement.dataset.isFullscreen || fullscreenElement.dataset.isFullscreen === 'false') {
                 const { width, height } = fullscreenElement.getBoundingClientRect()
 
                 rect = {
@@ -368,14 +376,14 @@ const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullsc
                     left: fullscreenElement.offsetLeft,
                 }
 
-                isFullscreen = true
+                fullscreenElement.dataset.isFullscreen = 'true'
 
                 setFullscreenStyles({
                     width: '100%', height: '100%',
                     left: 0, top: 0,
                 })
             } else {
-                isFullscreen = false
+                fullscreenElement.dataset.isFullscreen = 'false'
 
                 setFullscreenStyles({
                     width: `${rect.width}px`,
