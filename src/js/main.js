@@ -483,3 +483,5 @@ restorePageState()
 window.addEventListener('beforeunload', () => {
     savePageState()
 }, false);
+
+document.querySelector('.loader').remove()

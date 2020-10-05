@@ -30,11 +30,17 @@ html, body {
     background-color: #e0e0e0;
 }
 
-.draggable {
-    position: relative;
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    z-index: 9999999;
 }
 
-.resizable {
+.draggable, .resizable {
     position: relative;
 }
 
