@@ -44,6 +44,11 @@ const windows = [
             // draggable: true,
         }
     },
+    {
+        id: 'snake',
+        title: 'Snake',
+        contentSrc: '/windows/snake.html',
+    },
 ]
 
 let zIndex = 1
@@ -123,6 +128,7 @@ const createWindow = (id, ignoreOpened = false) => {
     const {
         title = '',
         content = '',
+        contentSrc,
         items,
         itemsSort,
         styles,
@@ -161,7 +167,27 @@ const createWindow = (id, ignoreOpened = false) => {
         addEventListeners(titleWrapper, ['contextmenu'], close)
     }
 
-    contentDiv.innerHTML = content
+    if (contentSrc) {
+        fetch(contentSrc)
+            .then(res => res.text())
+            .then(html => {
+                contentDiv.innerHTML = html
+
+                const scripts = contentDiv.getElementsByTagName('script')
+
+                scripts.forEach(script => {
+                    if (script.src) {
+                        const tag = document.createElement('script')
+                        tag.src = script.src
+                        document.getElementsByTagName('head')[0].appendChild(tag)
+                    } else {
+                        eval(script.innerHTML)
+                    }
+                })
+            })
+    } else {
+        contentDiv.innerHTML = content
+    }
 
     if (items && items.length) {
         const itemsWrapper = createDiv(contentDiv, ['items-wrapper'])
@@ -357,7 +383,6 @@ const makeFullscreen = (fullscreenElements) => fullscreenElements.forEach(fullsc
     const setFullscreenStyles = applyStyles(fullscreenElement)
 
     let clickCount = 0
-    // let isFullscreen = false
     let rect = {}
 
     addEventListeners(fullscreenElement, ['mousedown'], () => {

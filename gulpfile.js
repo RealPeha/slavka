@@ -20,7 +20,7 @@ const path = {
         js: './src/**/*.js',
         images: './src/img/*.*',
         fonts: './src/font/*.ttf',
-        other: ['./src/.htaccess'],
+        other: ['./src/.htaccess', './src/**/*.html'],
     },
     dist: {
         html: './public',
@@ -112,6 +112,7 @@ task('watch', () => {
 	watch(path.src.njkAll, series('nunjucks'))
 	watch(path.src.js, series('js'))
 	watch(path.src.css, series('css'))
+	watch(path.src.other, series('other'))
 })
 
 task('build', series('clean', parallel('nunjucks', 'css', 'js', 'image', 'font', 'other')))
