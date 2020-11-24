@@ -1,7 +1,8 @@
-const { safeJsonParse } = require('./utils')
+const { safeJsonParse, $$ } = require('./utils')
+const windowsManager = require('./windowsManager')
 
 const savePageState = () => {
-    const elements = document.querySelectorAll('.draggable')
+    const elements = $$('.draggable')
 
     const state = [...elements].map(element => {
         const style = element.style
@@ -17,7 +18,7 @@ const savePageState = () => {
     })
 
     localStorage.setItem('pageState', JSON.stringify(state))
-    localStorage.setItem('openedWindows', JSON.stringify(openedWindows))
+    localStorage.setItem('openedWindows', JSON.stringify(windowsManager.openedWindows))
 }
 
 const restorePageState = () => {

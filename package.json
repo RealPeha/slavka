@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "gulp",
     "build": "gulp build",
-    "serve": "serve public",
+    "serve": "serve public -l 2280",
     "deploy": "yarn build && node deploy.js"
   },
   "devDependencies": {

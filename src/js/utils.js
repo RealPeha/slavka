@@ -42,6 +42,9 @@ const safeJsonParse = (text, fallback = {}) => {
     }
 }
 
+const $ = selector => document.querySelector(selector)
+const $$ = selector => document.querySelectorAll(selector)
+
 module.exports = {
     addEventListeners,
     removeEventListeners,
@@ -49,4 +52,6 @@ module.exports = {
     createDiv,
     applyStyles,
     safeJsonParse,
+    $,
+    $$,
 }

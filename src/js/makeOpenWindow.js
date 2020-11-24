@@ -1,17 +1,16 @@
 const { addEventListeners } = require('./utils')
+const windowsManager = require('./windowsManager')
 
-const makeOpenWindow = (elements) => {
-    elements.forEach(element => {
-        const windowId = element.dataset.windowId
+const makeOpenWindow = (element) => {
+    const windowId = element.dataset.windowId
 
-        if (windowId) {
-            addEventListeners(element, ['mouseup', 'touchend'], () => {
-                if (!window.isDragging) {
-                    createWindow(windowId)
-                }
-            })
-        }
-    })
+    if (windowId) {
+        addEventListeners(element, ['mouseup', 'touchend'], () => {
+            if (!window.isDragging) {
+                windowsManager.open(windowId)
+            }
+        })
+    }
 }
 
 module.exports = makeOpenWindow

@@ -7,63 +7,61 @@ const {
 
 const setBodyStyles = applyStyles(document.body)
 
-const makeDraggable = (elements) => {
-    elements.forEach(element => {
-        const dragTargets = element.querySelectorAll('.drag-target') || [element]
+const makeDraggable = (element) => {
+    const dragTargets = element.querySelectorAll('.drag-target') || [element]
 
-        const setDraggableStyles = applyStyles(element)
+    const setDraggableStyles = applyStyles(element)
 
-        if (element !== dragTargets[0]) {
-            addEventListeners(element, ['mousedown', 'touchstart'], () => {
-                setDraggableStyles({ zIndex: ++window.zIndex })
-            })
-        }
+    if (element !== dragTargets[0]) {
+        addEventListeners(element, ['mousedown', 'touchstart'], () => {
+            setDraggableStyles({ zIndex: ++window.zIndex })
+        })
+    }
 
-        dragTargets.forEach(dragTarget => {
-            addEventListeners(dragTarget, ['mousedown', 'touchstart'], e => {
-                if (!e.target.classList.contains('drag-target')) {
-                    return
+    dragTargets.forEach(dragTarget => {
+        addEventListeners(dragTarget, ['mousedown', 'touchstart'], e => {
+            if (!e.target.classList.contains('drag-target')) {
+                return
+            }
+
+            const mouseClick = getPageCoords(e)
+
+            setDraggableStyles({ zIndex: ++window.zIndex, userSelect: 'none' })
+            setBodyStyles({ userSelect: 'none' })
+
+            const styles = window.getComputedStyle(element, null)
+
+            const left = parseInt(styles.getPropertyValue('left')) || 0
+            const top = parseInt(styles.getPropertyValue('top')) || 0
+
+            const handleMouseMove = e => {
+                if (element.dataset.isFullscreen === 'true') {
+                    element.dataset.isFullscreen = 'false'
                 }
 
-                const mouseClick = getPageCoords(e)
+                window.isDragging = true
 
-                setDraggableStyles({ zIndex: ++window.zIndex, userSelect: 'none' })
-                setBodyStyles({ userSelect: 'none' })
+                const { pageX, pageY } = getPageCoords(e)
 
-                const styles = window.getComputedStyle(element, null)
+                setDraggableStyles({
+                    left: left + pageX - mouseClick.pageX + 'px',
+                    top: top + pageY - mouseClick.pageY + 'px',
+                })
+            }
 
-                const left = parseInt(styles.getPropertyValue('left')) || 0
-                const top = parseInt(styles.getPropertyValue('top')) || 0
+            const handleMouseUp = () => {
+                removeEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
 
-                const handleMouseMove = e => {
-                    if (element.dataset.isFullscreen === 'true') {
-                        element.dataset.isFullscreen = 'false'
-                    }
+                setDraggableStyles({ userSelect: 'auto' })
+                setBodyStyles({ userSelect: 'auto' })
 
-                    window.isDragging = true
+                window.isDragging = false
+            }
 
-                    const { pageX, pageY } = getPageCoords(e)
+            addEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
+            addEventListeners(document, ['mouseup', 'touchend'], handleMouseUp, { once: true })
 
-                    setDraggableStyles({
-                        left: left + pageX - mouseClick.pageX + 'px',
-                        top: top + pageY - mouseClick.pageY + 'px',
-                    })
-                }
-
-                const handleMouseUp = () => {
-                    removeEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
-
-                    setDraggableStyles({ userSelect: 'auto' })
-                    setBodyStyles({ userSelect: 'auto' })
-
-                    window.isDragging = false
-                }
-
-                addEventListeners(document, ['mousemove', 'touchmove'], handleMouseMove)
-                addEventListeners(document, ['mouseup', 'touchend'], handleMouseUp, { once: true })
-
-                dragTarget.ondragstart = () => false
-            })
+            dragTarget.ondragstart = () => false
         })
     })
 }
