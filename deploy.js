@@ -16,5 +16,5 @@ const config = {
  
 ftpDeploy
     .deploy(config)
-    .then(res => console.log('finished:', res))
-    .catch(err => console.log(err))
+    .then(res => console.log('yes.', res))
+    .catch(err => console.log('no', err))

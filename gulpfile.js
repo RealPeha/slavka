@@ -8,6 +8,9 @@ const terser = require('gulp-terser')
 const babel = require('gulp-babel')
 const image = require('gulp-image')
 const clean = require('gulp-clean')
+const browserify = require('browserify')
+const source = require('vinyl-source-stream')
+const buffer = require('vinyl-buffer')
 const { pipeline } = require('readable-stream')
 
 const { series, parallel, src, task, dest, watch } = gulp
@@ -57,20 +60,21 @@ task('css', () => {
 })
 
 task('js', () => {
-    return pipeline(
-        src(path.src.js),
-        babel({
+    return browserify('./src/js/index.js')
+        .bundle()
+        .pipe(source('index.js'))
+        .pipe(buffer())
+        .pipe(babel({
             presets: [
                 ['@babel/env', {
                     modules: false,
                 }],
             ]
-        }),
-        terser({
+        }))
+        .pipe(terser({
             toplevel: true,
-        }),
-        dest(path.dist.js),
-    )
+        }))
+        .pipe(gulp.dest('./public/js'))
 })
 
 task('watch', () => {
@@ -103,7 +107,7 @@ task('other', () => {
 
 task('clean', () => {
     return pipeline(
-        src('./public', { read: false }),
+        src('./public', { read: false, allowEmpty: true }),
         clean(),
     )
 })
