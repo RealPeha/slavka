@@ -1,7 +1,7 @@
 const {
     applyStyles,
     addEventListeners,
-} = require('./utils')
+} = require('../utils')
 
 const makeFullscreen = (element) => {
     const setFullscreenStyles = applyStyles(element)

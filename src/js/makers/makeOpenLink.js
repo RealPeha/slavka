@@ -1,4 +1,4 @@
-const { addEventListeners } = require('./utils')
+const { addEventListeners } = require('../utils')
 
 const makeOpenLink = (element) => {
     const href = element.dataset.href

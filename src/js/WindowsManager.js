@@ -1,21 +1,18 @@
+const PageState = require('./PageState')
 const Window = require('./window')
 
 class WindowsManager {
     constructor() {
         this.windows = new Map()
-        this.openedWindows = new Set()
+        this.openedWindows = new Set(PageState.restoreOpenedWindows())
+
+        this.openedWindows.forEach(id => {
+            this.open(id, true)
+        })
     }
 
     register(id, window) {
         this.windows.set(id, window)
-    }
-
-    init(openedWindows) {
-        this.openedWindows = new Set(openedWindows)
-
-        openedWindows.forEach(id => {
-            this.open(id, true)
-        })
     }
 
     open(id, ignoreOpened = false) {

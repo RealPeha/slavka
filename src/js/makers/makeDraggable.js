@@ -3,7 +3,7 @@ const {
     addEventListeners,
     removeEventListeners,
     getPageCoords,
-} = require('./utils')
+} = require('../utils')
 
 const setBodyStyles = applyStyles(document.body)
 

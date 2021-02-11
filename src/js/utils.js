@@ -45,6 +45,8 @@ const safeJsonParse = (text, fallback = {}) => {
 const $ = selector => document.querySelector(selector)
 const $$ = selector => document.querySelectorAll(selector)
 
+const isLargeScreen = () => window.innerWidth > 744
+
 module.exports = {
     addEventListeners,
     removeEventListeners,
@@ -54,4 +56,5 @@ module.exports = {
     safeJsonParse,
     $,
     $$,
+    isLargeScreen,
 }

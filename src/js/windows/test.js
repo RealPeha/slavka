@@ -1,3 +1,5 @@
+const Window = require('../window')
+
 module.exports = new Window('mine')
     .title('Minecraft')
     .items([

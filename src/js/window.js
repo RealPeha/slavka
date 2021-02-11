@@ -1,10 +1,5 @@
-const { createDiv, applyStyles } = require('./utils')
-
-const makeDraggable = require('./makeDraggable')
-const makeResizable = require('./makeResizable')
-const makeFullscreen = require('./makeFullscreen')
-const makeOpenLink = require('./makeOpenLink')
-const makeOpenWindow = require('./makeOpenWindow')
+const { createDiv, applyStyles, $, addEventListeners } = require('./utils')
+const makers = require('./makers')
 
 const defaultFeatures = {
     resizable: true,
@@ -35,6 +30,7 @@ const createItem = (parent, item) => {
 class Window {
     constructor(id) {
         this.id = id
+
         this._title = ''
         this._items = []
         this._content = ''
@@ -44,10 +40,18 @@ class Window {
         this._features = null
     }
 
-    title(text) {
-        this._title = text
+    set(prop, value) {
+        this[prop] = value
 
         return this
+    }
+
+    title(title) {
+        return this.set('_title', title)
+    }
+
+    content(content) {
+        return this.set('_content', content)
     }
 
     items(itemsArr, itemsSort) {
@@ -88,15 +92,15 @@ class Window {
             const titleContent = createDiv(titleDiv)
             const titleClose = createDiv(titleWrapper, ['window-close'])
     
-            addEventListeners(titleClose, ['mousedown'], close, { once: true })
+            addEventListeners(titleClose, ['mousedown'], (e) => window.windowManager.close(e), { once: true })
     
-            titleContent.innerText = title
+            titleContent.innerText = _title
         } else {
-            addEventListeners(titleWrapper, ['contextmenu'], close, { once: true })
+            addEventListeners(titleWrapper, ['contextmenu'], (e) => window.windowManager.close(e), { once: true })
         }
     
-        if (contentSrc) {
-            fetch(contentSrc)
+        if (_contentSrc) {
+            fetch(_contentSrc)
                 .then(res => res.text())
                 .then(html => {
                     contentWrapper.innerHTML = html
@@ -114,46 +118,46 @@ class Window {
                     })
                 })
         } else {
-            contentWrapper.innerHTML = content
+            contentWrapper.innerHTML = _content
         }
     
-        if (items && items.length) {
+        if (_items && _items.length) {
             const itemsWrapper = createDiv(contentWrapper, ['items-wrapper'])
     
-            if (itemsSort) {
-                items.sort(itemsSort)
+            if (_itemsSort) {
+                _items.sort(_itemsSort)
             }
     
-            items.forEach(item => {
+            _items.forEach(item => {
                 const createdItem = createItem(itemsWrapper, item)
     
                 if (item.href) {
-                    makeOpenLink(createdItem)
+                    makers.makeOpenLink(createdItem)
                 } else if (item.windowId) {
-                    makeOpenWindow(createdItem)
+                    makers.makeOpenWindow(createdItem)
                 }
             })
         }
     
-        features.draggable && makeDraggable(windowWrapper)
-        features.resizable && makeResizable(windowWrapper)
-        features.fullscreen && makeFullscreen(windowWrapper)
+        features.draggable && makers.makeDraggable(windowWrapper)
+        features.resizable && makers.makeResizable(windowWrapper)
+        features.fullscreen && makers.makeFullscreen(windowWrapper)
     
-        centered(windowWrapper)
+        makers.makeCentered(windowWrapper)
     
         new SimpleBar(contentWrapper)
     
         const applyWindowStyles = applyStyles(windowWrapper)
     
         applyWindowStyles({
-            ...(styles || {}),
+            ...(_styles || {}),
             zIndex: ++window.zIndex,
             opacity: 1,
         })
     }
 
     close(e = {}) {
-        e.preventDefault()
+        e && e.preventDefault()
 
         applyStyles(this.windowWrapper)({ opacity: 0 })
 

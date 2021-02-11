@@ -4,7 +4,7 @@ const {
     removeEventListeners,
     getPageCoords,
     createDiv,
-} = require('./utils')
+} = require('../utils')
 
 const createResizer = (type, parent) => {
     const resizer = createDiv(parent, [

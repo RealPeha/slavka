@@ -1,5 +1,4 @@
-const { addEventListeners } = require('./utils')
-const windowsManager = require('./windowsManager')
+const { addEventListeners } = require('../utils')
 
 const makeOpenWindow = (element) => {
     const windowId = element.dataset.windowId
@@ -7,7 +6,7 @@ const makeOpenWindow = (element) => {
     if (windowId) {
         addEventListeners(element, ['mouseup', 'touchend'], () => {
             if (!window.isDragging) {
-                windowsManager.open(windowId)
+                window.windowsManager.open(windowId)
             }
         })
     }

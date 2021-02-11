@@ -38,12 +38,8 @@ const path = {
 task('nunjucks', () => {
 	return pipeline(
         src(path.src.njk),
-        nunjucks({
-            path: ['./src']
-        }),
-        rename({
-            dirname: './',
-        }),
+        nunjucks({ path: ['./src'] }),
+        rename({ dirname: './' }),
         dest(path.dist.html),
     )
 })
@@ -71,9 +67,7 @@ task('js', () => {
                 }],
             ]
         }))
-        .pipe(terser({
-            toplevel: true,
-        }))
+        .pipe(terser({ toplevel: true }))
         .pipe(gulp.dest('./public/js'))
 })
 
