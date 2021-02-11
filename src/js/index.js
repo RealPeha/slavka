@@ -14,19 +14,21 @@ window.zIndex = 1
 window.isDragging = false
 window.isLargeScreen = window.innerWidth > 744
 
-makers.makeDraggable($$('.draggable'))
-makers.makeResizable($$('.resizable'))
-makers.makeFullscreen($$('.fullscreen'))
-makers.makeCentered($$('.fullscreen'))
-makers.makeOpenLink($$('[data-href]'))
-makers.makeOpenWindow($$('[data-window-id]'))
+window.addEventListener('DOMContentLoaded', () => {
+    makers.makeDraggable($$('.draggable'))
+    makers.makeResizable($$('.resizable'))
+    makers.makeFullscreen($$('.fullscreen'))
+    makers.makeCentered($$('.fullscreen'))
+    makers.makeOpenLink($$('[data-href]'))
+    makers.makeOpenWindow($$('[data-window-id]'))
 
-window.openedWindows.forEach(windowId => window.createWindow(windowId, true))
+    window.openedWindows.forEach(windowId => window.createWindow(windowId, true))
 
-PageState.restoreState()
+    PageState.restoreState()
 
-window.addEventListener('beforeunload', () => {
-    PageState.save()
-}, false);
+    window.addEventListener('beforeunload', () => {
+        PageState.save()
+    }, false);
 
-setTimeout(() => $('.loader').remove(), 100)
+    $('.loader').remove()
+})
