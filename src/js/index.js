@@ -1,7 +1,7 @@
 window.windows = []
 window.register = (w) => window.windows.push(w)
 
-require('./windows')
+require('../windows')
 require('./createWindow')
 
 const PageState = require('./PageState')

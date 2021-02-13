@@ -18,10 +18,12 @@ class PageState {
             elements.forEach((element, i) => {
                 const elementState = state[i]
         
-                applyStyles(element)(elementState)
+                if (elementState) {
+                    applyStyles(element)(elementState)
 
-                if (elementState.fullscreen) {
-                    element.dataset.isFullscreen = elementState.fullscreen
+                    if (elementState.fullscreen) {
+                        element.dataset.isFullscreen = elementState.fullscreen
+                    }
                 }
             })
         }

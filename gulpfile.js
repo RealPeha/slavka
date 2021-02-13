@@ -22,6 +22,7 @@ const path = {
         css: './src/**/*.css',
         js: './src/**/*.js',
         images: './src/img/*.*',
+        icons: './src/icons/*.*',
         fonts: './src/font/*.ttf',
         other: ['./src/.htaccess', './src/**/*.html'],
     },
@@ -30,6 +31,7 @@ const path = {
         css: './public',
         js: './public',
         img: './public/img',
+        icons: './public/icons',
         font: './public/font',
         other: './public',
     },
@@ -88,6 +90,9 @@ task('image', () => {
         src(path.src.images),
         image(),
         dest(path.dist.img),
+        src(path.src.icons),
+        image(),
+        dest(path.dist.icons),
     )
 })
 
