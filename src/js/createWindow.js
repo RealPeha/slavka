@@ -11,7 +11,7 @@ const windowsContainer = $('.content-wrapper')
 const cachedWindows = new Map()
 
 const createItem = (parent, item) => {
-    const { title = '', windowId, type, href } = item
+    const { title = '', windowId, type, href, action } = item
 
     const itemWrapper = createDiv(parent, ['item', type])
     const itemContent = createDiv(itemWrapper, ['item-content'])
@@ -24,6 +24,10 @@ const createItem = (parent, item) => {
 
     if (href) {
         itemWrapper.dataset.href = href
+    }
+
+    if (action && typeof action === 'function') {
+        itemWrapper.addEventListener('click', action)
     }
 
     return itemWrapper

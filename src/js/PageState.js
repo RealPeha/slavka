@@ -30,6 +30,10 @@ class PageState {
     }
 
     static save() {
+        if (PageState.isBlock) {
+            return
+        }
+
         const elements = $$('.draggable')
 
         const state = [...elements].map(element => {
@@ -48,6 +52,15 @@ class PageState {
         localStorage.setItem('pageState', JSON.stringify(state))
         localStorage.setItem('openedWindows', JSON.stringify(window.openedWindows))
     }
+
+    static reset() {
+        localStorage.removeItem('pageState')
+        localStorage.removeItem('openedWindows')
+
+        PageState.isBlock = true
+    }
 }
+
+window.PageState = PageState
 
 module.exports = PageState
