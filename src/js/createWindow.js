@@ -11,12 +11,21 @@ const windowsContainer = $('.content-wrapper')
 const cachedWindows = new Map()
 
 const createItem = (parent, item) => {
-    const { title = '', windowId, type, href, action } = item
+    const { title = '', windowId, type, href, action, icon, iconHover } = item
 
     const itemWrapper = createDiv(parent, ['item', type])
     const itemContent = createDiv(itemWrapper, ['item-content'])
 
-    itemContent.innerText = title
+    itemContent.innerHTML = `<span class='${icon ? 'bottom' : ''}'>${title}</span>`
+
+    if (icon) {
+        itemContent.style.backgroundImage = `url(${icon})`
+
+        if (iconHover) {
+            itemContent.onmouseover = () => itemContent.style.backgroundImage = `url(${iconHover})`
+            itemContent.onmouseleave = () => itemContent.style.backgroundImage = `url(${icon})`
+        }
+    }
 
     if (windowId) {
         itemWrapper.dataset.windowId = windowId

@@ -1,10 +1,16 @@
-{% macro folder(name, link, id, icon) %}
+{% macro folder(name, link, text, id, icon, iconHover) %}
     <div class='item folder draggable'>
         <div
             class='item-content drag-target'
             {% if link %} data-href='{{ link }}' {% endif %}
             {% if id %} data-window-id='{{ id }}' {% endif %}
-            {% if icon %} style='background-image: url(../icons/{{ icon }})' {% endif %}
+            {% if icon %}
+                style='background-image: url(../icons/{{ icon }})'
+                {% if iconHover %}
+                    onmouseover="this.style.backgroundImage = 'url(../icons/{{ iconHover }})'"
+                    onmouseleave="this.style.backgroundImage = 'url(../icons/{{ icon }})'"
+                {% endif %}
+            {% endif %}
         >{{ name }}</div>
     </div>
 {% endmacro %}
@@ -15,7 +21,13 @@
             class='item-content drag-target'
             {% if link %}data-href='{{ link }}'{% endif %}
             {% if id %}data-window-id='{{ id }}'{% endif %}
-            {% if icon %} style='background-image: url(icons/{{ icon }})' {% endif %}
+            {% if icon %}
+                style='background-image: url(../icons/{{ icon }})'
+                {% if iconHover %}
+                    onmouseover="this.style.backgroundImage = 'url(../icons/{{ iconHover }})'"
+                    onmouseleave="this.style.backgroundImage = 'url(../icons/{{ icon }})'"
+                {% endif %}
+            {% endif %}
         >{{ name }}</div>
     </div>
 {% endmacro %}

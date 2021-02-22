@@ -227,6 +227,7 @@ html, body {
 
 .content .items-wrapper {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .sidebar-wrapper {
@@ -264,6 +265,15 @@ html, body {
     cursor: pointer;
     word-break: break-all;
     image-rendering: pixelated;
+    position: relative;
+}
+
+.item-content span.bottom {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #000 !important;
 }
 
 .folder .item-content {

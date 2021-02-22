@@ -5,6 +5,8 @@ window.register({
         {
             type: 'file',
             title: 'Reset',
+            icon: '/icons/reset.png',
+            iconHover: '../icons/reset_selected.png',
             action: () => {
                 PageState.reset()
                 document.location.reload()
