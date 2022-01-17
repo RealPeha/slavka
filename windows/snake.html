@@ -1,0 +1,143 @@
+<canvas id='snake'></canvas>
+<script>
+    const canvas = document.querySelector('#snake')
+
+    const width = canvas.parentNode.offsetWidth
+    const height = canvas.parentNode.offsetHeight
+
+    const roundTo = (n, to) => {
+        return Math.round(n / to) * to
+    }
+
+    const pos = (x, y) => ({ x, y })
+
+    class Snake {
+        constructor(x, y) {
+            this.speed = 50;
+            this.parts = [pos(x, y), pos(x, y)];
+            this.food = pos(
+                roundTo(Math.random() * width, 50),
+                roundTo(Math.random() * height, 50)
+            );
+            this.dir = pos(0, this.speed);
+
+            this.initEvents();
+        }
+
+        update() {
+            this.parts.forEach((part, index) => {
+                const nextPart = this.parts[index + 1];
+
+                if (nextPart) {
+                    part.x = nextPart.x;
+                    part.y = nextPart.y;
+                } else {
+                    part.x += this.dir.x;
+                    part.y += this.dir.y;
+                }
+
+                part.x = roundTo(part.x, 50);
+                part.y = roundTo(part.y, 50);
+            });
+
+            const head = this.head;
+
+            if (head.x < 0) {
+                head.x = width;
+            }
+
+            if (head.x > width) {
+                head.x = 0;
+            }
+
+            if (head.y < 0) {
+                head.y = height;
+            }
+
+            if (head.y > height) {
+                head.y = 0;
+            }
+
+            const part = this.parts.find((part) => {
+                return part !== head && head.x === part.x && head.y === part.y;
+            });
+
+            if (part) {
+                this.parts.splice(0, this.parts.indexOf(part) + 1);
+            }
+
+            if (head.x === this.food.x && head.y === this.food.y) {
+                this.grow();
+                this.food.x = roundTo(Math.random() * (width - 50), 50)
+                this.food.y = roundTo(Math.random() * (height - 50), 50)
+            }
+        }
+
+        grow() {
+            this.parts.push(pos(this.head.x, this.head.y));
+        }
+
+        get head() {
+            return this.parts[this.parts.length - 1];
+        }
+
+        initEvents() {
+            const dirs = {
+            37: pos(-this.speed, 0),
+            38: pos(0, -this.speed),
+            39: pos(this.speed, 0),
+            40: pos(0, this.speed)
+            };
+
+            window.addEventListener("keydown", (e) => {
+                this.dir = dirs[e.keyCode];
+            });
+        }
+
+        draw(ctx) {
+            ctx.fillStyle = "tomato";
+            ctx.fillRect(this.food.x, this.food.y, 50, 50);
+
+            ctx.fillStyle = "black";
+            this.parts.forEach((part) => {
+                ctx.fillRect(part.x, part.y, 50, 50);
+            });
+        }
+    }
+
+    const ctx = canvas.getContext("2d");
+    canvas.width = width;
+    canvas.height = height;
+
+    const snake = new Snake(100, 100);
+
+    let last = 0;
+    const update = (t) => {
+    if (t - last >= 100) {
+        last = t;
+        snake.update();
+    }
+    };
+
+    const render = () => {
+    snake.draw(ctx);
+    };
+
+    const loop = (t) => {
+    ctx.clearRect(0, 0, width, height);
+
+    update(t);
+    render();
+
+    requestAnimationFrame(loop);
+    };
+
+    requestAnimationFrame(loop);
+</script>
+<style>
+    #snake {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+</style>
